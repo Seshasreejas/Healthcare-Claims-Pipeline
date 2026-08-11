@@ -1,0 +1,32 @@
+name: CI
+
+# Runs on every push and every pull request against main -- catches
+# broken transformation logic before it merges, same idea as reviewing
+# a PR's Terraform plan before applying it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint with flake8
+        run: flake8 transform.py tests/ --max-line-length=100
+
+      - name: Run tests
+        run: pytest tests/ -v
